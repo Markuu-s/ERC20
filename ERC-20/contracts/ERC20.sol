@@ -52,4 +52,24 @@ contract ERC20 {
         return true;
     }
 
+    function transferFrom(
+        address _from,
+        address _to,
+        uint256 _value
+    ) public returns (bool success) {
+        require(balances[_from] >= _value);
+        require(_from != address(0));
+        require(_to != address(0));
+        require(_from != _to);
+        require(allow[_from][msg.sender] >= _value);
+
+        balances[_from] -= _value;
+        balances[_to] += _value;
+
+        allow[_from][msg.sender] -= _value;
+
+        emit Transfer(_from, _to, _value);
+        return true;
+    }
+
 }
