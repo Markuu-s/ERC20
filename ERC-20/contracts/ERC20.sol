@@ -72,4 +72,27 @@ contract ERC20 {
         return true;
     }
 
+    function approve(address _spender, uint256 _value)
+        public
+        returns (bool success)
+    {
+        require(_spender != address(0));
+
+        allow[msg.sender][_spender] = _value;
+
+        emit Approval(msg.sender, _spender, _value);
+        return true;
+    }
+
+    function allowance(address _owner, address _spender)
+        public
+        view
+        returns (uint256 remaining)
+    {
+        require(_owner != address(0));
+        require(_spender != address(0));
+
+        return allow[_owner][_spender];
+    }
+
 }
