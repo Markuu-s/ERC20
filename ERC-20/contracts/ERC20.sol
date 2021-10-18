@@ -16,4 +16,19 @@ contract ERC20 {
         address indexed _spender,
         uint256 _value
     );
+
+    constructor(
+        string memory _name,
+        string memory _symbol,
+        uint8 _decimals,
+        uint256 _totalSupply
+    ) {
+        name = _name;
+        symbol = _symbol;
+        decimals = _decimals;
+        totalSupply = _totalSupply;
+
+        balances[msg.sender] = _totalSupply;
+        admin = msg.sender;
+    }
 }
