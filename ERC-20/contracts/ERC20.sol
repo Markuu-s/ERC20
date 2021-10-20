@@ -42,7 +42,7 @@ contract ERC20 is AccessControl {
     }
 
     function balanceOf(address _owner) public view returns (uint256 balance) {
-        require(_owner != address(0));
+        require(_owner != address(0), "Address is exist");
         return balances[_owner];
     }
 
@@ -50,9 +50,9 @@ contract ERC20 is AccessControl {
         public
         returns (bool success)
     {
-        require(_to != msg.sender);
-        require(balances[msg.sender] >= _value);
-        require(_to != address(0));
+        require(_to != msg.sender, "Not allow transer himself");
+        require(balances[msg.sender] >= _value, "Balance should be a more or equal of value");
+        require(_to != address(0), "Address _to is exist");
 
         balances[msg.sender] -= _value;
         balances[_to] += _value;
@@ -66,11 +66,11 @@ contract ERC20 is AccessControl {
         address _to,
         uint256 _value
     ) public returns (bool success) {
-        require(balances[_from] >= _value);
-        require(_from != address(0));
-        require(_to != address(0));
-        require(_from != _to);
-        require(allow[_from][msg.sender] >= _value);
+        require(balances[_from] >= _value, "Balance _from should be more or equal of value");
+        require(_from != address(0), "Address _from should be exist");
+        require(_to != address(0), "Address _to should be exist");
+        require(_from != _to, "Addresses _from and _to should not be equal");
+        require(allow[_from][msg.sender] >= _value, "Allow should be more or equal of value");
 
         balances[_from] -= _value;
         balances[_to] += _value;
@@ -85,7 +85,7 @@ contract ERC20 is AccessControl {
         public
         returns (bool success)
     {
-        require(_spender != address(0));
+        require(_spender != address(0), "Address of spender should be exist");
 
         allow[msg.sender][_spender] = _value;
 
@@ -98,13 +98,14 @@ contract ERC20 is AccessControl {
         view
         returns (uint256 remaining)
     {
-        require(_owner != address(0));
-        require(_spender != address(0));
+        require(_owner != address(0), "Address _owner should be exist");
+        require(_spender != address(0), "Address _spender should be exist");
 
         return allow[_owner][_spender];
     }
 
     function burn(address _from, uint256 _value) public onlyRole(burner) {
+        require(totalSupply[_from] >= _value, "TotalSupply should be more or equal of value");
         totalSupply[_from] -= _value;
         balances[_from] -= _value;
         emit Transfer(_from, address(0), _value);
