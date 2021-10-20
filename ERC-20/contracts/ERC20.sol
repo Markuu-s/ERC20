@@ -1,6 +1,7 @@
 pragma solidity 0.8.6;
+import "@openzeppelin/contracts/access/AccessControl.sol";
 
-contract ERC20 {
+contract ERC20 is AccessControl {
     string public name;
     string public symbol;
     uint8 public decimals;
@@ -9,6 +10,9 @@ contract ERC20 {
     mapping(address => uint256) private balances;
     mapping(address => mapping(address => uint256)) private allow;
     address private admin;
+
+    address private burner;
+    address private minter;
 
     event Transfer(address indexed _from, address indexed _to, uint256 _value);
     event Approval(
@@ -21,7 +25,9 @@ contract ERC20 {
         string memory _name,
         string memory _symbol,
         uint8 _decimals,
-        uint256 _totalSupply
+        uint256 _totalSupply,
+        address _burner,
+        address _minter
     ) {
         name = _name;
         symbol = _symbol;
@@ -30,6 +36,9 @@ contract ERC20 {
 
         balances[msg.sender] = _totalSupply;
         admin = msg.sender;
+
+        minter = _minter;
+        burner = _burner;
     }
 
     function balanceOf(address _owner) public view returns (uint256 balance) {
@@ -95,4 +104,15 @@ contract ERC20 {
         return allow[_owner][_spender];
     }
 
+    function burn(address _from, uint256 _value) public onlyRole(burner) {
+        totalSupply[_from] -= _value;
+        balances[_from] -= _value;
+        emit Transfer(_from, address(0), _value);
+    }
+
+    function mint(address _to, uint256 _value) public onlyRole(minter) {
+        totalSupply[_to] += _value;
+        balances[_to] += _value;
+        emit Transfer(address(0), _to, _value);
+    }
 }
