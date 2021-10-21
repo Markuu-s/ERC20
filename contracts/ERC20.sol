@@ -43,7 +43,7 @@ contract ERC20 is AccessControl {
     }
 
     function balanceOf(address _owner) public view returns (uint256 balance) {
-        require(_owner != address(0), "Address is exist");
+        require(_owner != address(0), "Address must be exist");
         return balances[_owner];
     }
 
