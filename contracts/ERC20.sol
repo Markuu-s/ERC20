@@ -12,8 +12,8 @@ contract ERC20 is AccessControl {
     mapping(address => mapping(address => uint256)) private allow;
     address private admin;
 
-    bytes32 private burner;
-    bytes32 private minter;
+    bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
     event Transfer(address indexed _from, address indexed _to, uint256 _value);
     event Approval(
@@ -38,8 +38,8 @@ contract ERC20 is AccessControl {
         balances[msg.sender] = _totalSupply;
         admin = msg.sender;
 
-        minter = bytes32(uint256(uint160(_minter)) << 96);
-        burner = bytes32(uint256(uint160(_burner)) << 96);
+        _setupRole(MINTER_ROLE, _minter);
+        _setupRole(BURNER_ROLE, _burner);
     }
 
     function balanceOf(address _owner) public view returns (uint256 balance) {
@@ -105,14 +105,17 @@ contract ERC20 is AccessControl {
         return allow[_owner][_spender];
     }
 
-    function burn(address _from, uint256 _value) public onlyRole(burner) {
-        require(totalSupply >= _value, "TotalSupply should be more or equal of value");
+    function burn(address _from, uint256 _value) public onlyRole(BURNER_ROLE) {
+        require(
+            totalSupply >= _value,
+            "TotalSupply should be more or equal of value"
+        );
         totalSupply -= _value;
         balances[_from] -= _value;
         emit Transfer(_from, address(0), _value);
     }
 
-    function mint(address _to, uint256 _value) public onlyRole(minter) {
+    function mint(address _to, uint256 _value) public onlyRole(MINTER_ROLE) {
         totalSupply += _value;
         balances[_to] += _value;
         emit Transfer(address(0), _to, _value);
