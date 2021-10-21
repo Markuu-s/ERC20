@@ -1,4 +1,5 @@
 pragma solidity 0.8.6;
+
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
 contract ERC20 is AccessControl {
@@ -11,8 +12,8 @@ contract ERC20 is AccessControl {
     mapping(address => mapping(address => uint256)) private allow;
     address private admin;
 
-    address private burner;
-    address private minter;
+    bytes32 private burner;
+    bytes32 private minter;
 
     event Transfer(address indexed _from, address indexed _to, uint256 _value);
     event Approval(
@@ -37,8 +38,8 @@ contract ERC20 is AccessControl {
         balances[msg.sender] = _totalSupply;
         admin = msg.sender;
 
-        minter = _minter;
-        burner = _burner;
+        minter = bytes32(uint256(uint160(_minter)) << 96);
+        burner = bytes32(uint256(uint160(_burner)) << 96);
     }
 
     function balanceOf(address _owner) public view returns (uint256 balance) {
@@ -47,8 +48,8 @@ contract ERC20 is AccessControl {
     }
 
     function transfer(address _to, uint256 _value)
-        public
-        returns (bool success)
+    public
+    returns (bool success)
     {
         require(_to != msg.sender, "Not allow transer himself");
         require(balances[msg.sender] >= _value, "Balance should be a more or equal of value");
@@ -82,8 +83,8 @@ contract ERC20 is AccessControl {
     }
 
     function approve(address _spender, uint256 _value)
-        public
-        returns (bool success)
+    public
+    returns (bool success)
     {
         require(_spender != address(0), "Address of spender should be exist");
 
@@ -94,9 +95,9 @@ contract ERC20 is AccessControl {
     }
 
     function allowance(address _owner, address _spender)
-        public
-        view
-        returns (uint256 remaining)
+    public
+    view
+    returns (uint256 remaining)
     {
         require(_owner != address(0), "Address _owner should be exist");
         require(_spender != address(0), "Address _spender should be exist");
@@ -105,14 +106,14 @@ contract ERC20 is AccessControl {
     }
 
     function burn(address _from, uint256 _value) public onlyRole(burner) {
-        require(totalSupply[_from] >= _value, "TotalSupply should be more or equal of value");
-        totalSupply[_from] -= _value;
+        require(totalSupply >= _value, "TotalSupply should be more or equal of value");
+        totalSupply -= _value;
         balances[_from] -= _value;
         emit Transfer(_from, address(0), _value);
     }
 
     function mint(address _to, uint256 _value) public onlyRole(minter) {
-        totalSupply[_to] += _value;
+        totalSupply += _value;
         balances[_to] += _value;
         emit Transfer(address(0), _to, _value);
     }
