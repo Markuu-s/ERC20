@@ -70,5 +70,38 @@ describe('Contract: ERC20', () => {
             expect(_decimals).to.equal(data.decimals)
             expect(_totalSupply).to.equal(data.totalSupply)
         })
+
+        it('Check function mint', async () => {
+            let _value = 1000
+
+            let isTrue = true
+
+            try {
+                await token0.mint(data.burner.address, _value)
+                isTrue = false
+            } catch (e)
+            {
+
+            }
+            if (!isTrue)
+            {
+                expect(0, "Call a function mint can only minter").to.equal(1)
+            }
+
+            try {
+                await token0.connect(data.burner).mint(data.burner.address, _value)
+                isTrue = false
+            } catch (e)
+            {
+
+            }
+            if (!isTrue)
+            {
+                expect(0, "Call a function mint can only minter").to.equal(1)
+            }
+
+            await token0.connect(data.minter).mint(data.burner.address, _value)
+            expect(await token0.balanceOf(data.burner.address)).to.equal(_value)
+        })
     })
 })
