@@ -117,4 +117,30 @@ describe('Contract: ERC20', () => {
         })
     })
 
+    describe('Test function transferFrom', () => {
+        it ('Check requires', async () =>{
+            let _value = 1000
+            await expect(token0.transferFrom(data.minter.address, data.burner.address, _value)).reverted
+            await expect(token0.transferFrom(data.minter.address, data.minter.address, _value)).reverted
+
+            await token0.connect(data.owner).transfer(data.minter.address, _value)
+            await expect(token0.transferFrom(data.minter.address, data.burner.address, _value)).reverted
+        })
+
+        it ('Check works', async () =>{
+            let _value = 1000
+
+            await token0.connect(data.owner).transfer(data.minter.address, _value)
+            let oldBalanceOfMinter = await token0.balanceOf(data.minter.address)
+
+            await token0.connect(data.minter).approve(data.owner.address, _value)
+            expect(await token0.allowance(data.minter.address, data.owner.address)).to.equal(_value)
+
+            await token0.connect(data.owner).transferFrom(data.minter.address, data.burner.address, _value)
+
+            let newBalanceOfMinter = await token0.balanceOf(data.minter.address)
+            expect(oldBalanceOfMinter.sub(newBalanceOfMinter)).to.equal(_value)
+            expect(await token0.balanceOf(data.burner.address)).to.equal(_value)
+        })
+    })
 })
