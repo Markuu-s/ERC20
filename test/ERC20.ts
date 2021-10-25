@@ -70,7 +70,9 @@ describe('Contract: ERC20', () => {
             expect(_decimals).to.equal(data.decimals)
             expect(_totalSupply).to.equal(data.totalSupply)
         })
+    })
 
+    describe('Test mint and burn', () => {
         it('Check function mint', async () => {
             let _value = 1000
 
