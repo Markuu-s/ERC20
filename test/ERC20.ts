@@ -82,5 +82,15 @@ describe('Contract: ERC20', () => {
             await token0.connect(data.minter).mint(data.burner.address, _value)
             expect(await token0.balanceOf(data.burner.address)).to.equal(_value)
         })
+
+        it("Check function burn", async () => {
+            let _value = 1000
+            await expect(token0.burn(data.minter.address, _value)).reverted
+            await expect(token0.connect(data.minter).burn(data.minter.address, _value)).reverted
+
+            await expect(token0.connect(data.burner).burn(data.minter.address, _value)).reverted
+            await token0.connect(data.minter).mint(data.minter.address, _value)
+            await token0.connect(data.burner).burn(data.minter.address, _value)
+        })
     })
 })
