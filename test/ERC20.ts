@@ -11,6 +11,7 @@ import Web3 from 'web3'
 const web3 = new Web3(network.provider) as Web3
 
 import {ERC20} from '../typechain'
+import exp from "constants";
 let token0: ERC20
 
 class GlobalVariableOfContract {
@@ -93,4 +94,27 @@ describe('Contract: ERC20', () => {
             await token0.connect(data.burner).burn(data.minter.address, _value)
         })
     })
+
+    describe('Check function transfer', () =>{
+        it('Check requires', async () => {
+            let _value = 1000
+            await expect(token0.transfer(data.owner.address, _value)).reverted
+            await expect(token0.connect(data.minter).transfer(data.burner.address, _value)).reverted
+        })
+
+        it('Check work', async () => {
+            let _value = 1000
+            let oldBalanceOfOwner = await token0.balanceOf(data.owner.address)
+            let oldBalanceOfMinter = await token0.balanceOf(data.minter.address)
+
+            await token0.transfer(data.minter.address, _value)
+
+            let newBalanceOfOwner = await token0.balanceOf(data.owner.address)
+            let newBalanceOfMinter = await token0.balanceOf(data.minter.address)
+
+            expect(oldBalanceOfOwner.sub(newBalanceOfOwner)).to.equal(_value)
+            expect(newBalanceOfMinter.sub(oldBalanceOfMinter)).to.equal(_value)
+        })
+    })
+
 })
